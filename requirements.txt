@@ -1,0 +1,4 @@
+openai
+textstat
+beautifulsoup4
+markdown
