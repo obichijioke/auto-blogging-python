@@ -1,28 +1,60 @@
+from flask import Flask, request, jsonify
+from flask_cors import CORS  # Add this import
 from seo_analyzer import analyze_seo, optimize_content
 from content_generator import generate_content, generate_blog_topics
 from markdown_converter import convert_markdown_to_html
 
-# Read content from text file
-with open('content.txt', 'r') as file:
-    content = file.read()
+app = Flask(__name__)
+CORS(app)  # Add this line to enable CORS for all routes
 
-keyword = "dog walking"
+@app.route('/analyze_seo', methods=['POST'])
+def analyze_seo_route():
+    data = request.json
+    content = data.get('content')
+    keyword = data.get('keyword')
+    
+    html_content = convert_markdown_to_html(content)
+    seo_results = analyze_seo(html_content, keyword)
+    return jsonify(seo_results)
 
-# Convert Markdown content to HTML
-html_content = convert_markdown_to_html(content)
+@app.route('/optimize_content', methods=['POST'])
+def optimize_content_route():
+    data = request.json
+    content = data.get('content')
+    keyword = data.get('keyword')
+    
+    html_content = convert_markdown_to_html(content)
+    optimized_content = optimize_content(html_content, keyword)
+    return jsonify({'optimized_content': optimized_content})
 
-seo_results = analyze_seo(html_content, keyword)
-print(seo_results)
-optimized_content = optimize_content(html_content, keyword)
-print(optimized_content)
+@app.route('/generate_blog_topics', methods=['GET'])
+def generate_blog_topics_route():
+    keyword = request.args.get('keyword')
+    num_topics = int(request.args.get('num_topics', 5))
+    
+    blog_topics = generate_blog_topics(keyword, num_topics=num_topics)
+    return jsonify({'blog_topics': blog_topics})
 
-# Generate blog topics
-# blog_topics = generate_blog_topics(keyword, num_topics=5)
-# print("Blog Topics:")
-# for topic in blog_topics:
-#     print(f"- {topic}")
+@app.route('/generate_content', methods=['POST'])
+def generate_content_route():
+    data = request.json
+    keyword = data.get('keyword')
+    
+    generated_content = generate_content(keyword)
+    return jsonify({'generated_content': generated_content})
 
-# Example usage
+if __name__ == '__main__':
+    app.run(debug=True)
+
+# The following code is now handled by the Flask routes above
+# with open('content.txt', 'r') as file:
+#     content = file.read()
+# 
 # keyword = "dog walking"
-# generated_content = generate_content(keyword)
-# print(generated_content)
+# 
+# html_content = convert_markdown_to_html(content)
+# 
+# seo_results = analyze_seo(html_content, keyword)
+# print(seo_results)
+# optimized_content = optimize_content(html_content, keyword)
+# print(optimized_content)
